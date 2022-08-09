@@ -12,12 +12,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-    void on_zoomIn();
-    void on_zoomOut();
-    void on_reset();
+signals:
+    void reset();
+    void zoomIn();
+    void zoomOut();
 
-private:
-    Qt3DRender::QCamera* m_camera;
 };
 #endif // MAINWINDOW_H
