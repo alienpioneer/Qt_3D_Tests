@@ -34,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Create the container for the 3d window
     QWidget* window_container = QWidget::createWindowContainer(window);
-    //window_container->setMinimumSize(QSize(200,100));
-    //window_container->setMaximumSize(window->screen()->size());
     window_container->setParent(mainWidget);
 
     // Create 3d sceene root
@@ -43,12 +41,13 @@ MainWindow::MainWindow(QWidget *parent)
     window->setRootEntity(root_entity);
 
     // Create 3d camera
-    Qt3DRender::QCamera* m_camera = window->camera();
+    m_camera = window->camera();
     m_camera->lens()->setPerspectiveProjection(45.0f,16.0f/9.0f,0.1f,1000.0f);
     m_camera->setPosition(QVector3D(0,0,20.0f));
     m_camera->setUpVector(QVector3D(0,1,0));
     m_camera->setViewCenter(QVector3D(0,0,0));
 
+    //Qt3DExtras::QOrbitCameraController* camController = new Qt3DExtras::QOrbitCameraController(root_entity);
     Qt3DExtras::QFirstPersonCameraController* camController = new Qt3DExtras::QFirstPersonCameraController(root_entity);
     camController->setCamera(m_camera);
 
@@ -95,14 +94,10 @@ MainWindow::MainWindow(QWidget *parent)
     zoomIn->setFixedSize(QSize(80,30));
     zoomOut->setFixedSize(QSize(80,30));
     zoomIn->move(10,10);
-    zoomOut->move(120,10);
+    zoomOut->move(100,10);
 
     window_container->setFixedSize(QSize(800,550));
     window_container->move(0,50);
-
-    //mainWidget->layout()->addWidget(window_container);
-    //mainWidget->layout()->addWidget(zoomIn);
-    //window_container->show();
 }
 
 MainWindow::~MainWindow()
@@ -111,15 +106,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_zoomIn()
 {
-    qDebug() << "Zoom in";
-    QVector3D pos = m_camera->position();
-    m_camera->setPosition(pos + QVector3D(0,0,10.0f));
+    m_camera->setPosition(m_camera->position() - QVector3D(0,0,10.0f));
 }
 
 void MainWindow::on_zoomOut()
 {
-    qDebug() << "Zoom out";
-    QVector3D pos = m_camera->position();
-    m_camera->setPosition(pos - QVector3D(0,0,10.0f));
+    m_camera->setPosition(m_camera->position() + QVector3D(0,0,10.0f));
 }
 
