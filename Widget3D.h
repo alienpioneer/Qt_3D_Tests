@@ -5,6 +5,12 @@
 #include <QObject>
 #include <QWidget>
 
+enum class MeshLoadingStatus
+{
+    LOADING = 0,
+    LOADED = 1
+};
+
 
 class Widget3D : public QWidget
 {
@@ -12,10 +18,17 @@ class Widget3D : public QWidget
 public:
     explicit Widget3D(const QSize& size, const QPoint& position, QWidget *parent = nullptr);
 
+public:
+    void zoomIn();
+    void zoomOut();
+    void reset();
+    void loadMesh(const QString sourcePath);
+
 private slots:
-    void on_zoomIn();
-    void on_zoomOut();
-    void on_reset();
+    void on_meshLoaderStatusChanged();
+
+private:
+    void updateMeshStatus(const MeshLoadingStatus& status);
 
 private:
     Qt3DCore::QEntity*      m_sceneRoot;
@@ -24,6 +37,13 @@ private:
 
     Qt3DCore::QEntity*      m_3dObjectNode;
     Qt3DRender::QMesh*      m_objMesh;
+
+    Qt3DCore::QTransform*   m_lightTransformNode;
+    QColor                  m_bkgColor;
+
+    std::chrono::steady_clock::time_point m_t0;
+    std::chrono::steady_clock::time_point m_t1;
+
 };
 
 #endif // WIDGET3D_H

@@ -2,6 +2,5 @@
     <qresource prefix="/">
         <file>test.obj</file>
         <file>Qt_logo.obj</file>
-        <file>testCube.obj</file>
     </qresource>
 </RCC>

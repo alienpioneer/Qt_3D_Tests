@@ -1,7 +1,6 @@
 #include "MainWindow.h"
 #include "Widget3D.h"
 #include <QHBoxLayout>
-#include <QPushButton>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -13,36 +12,37 @@ MainWindow::MainWindow(QWidget *parent)
     mainWidget->setFixedSize(QSize(800,600));
     mainWidget->move(50,50);
     mainWidget->setStyleSheet("border:1px solid black;");
-    //mainWidget->setLayout(new QHBoxLayout());
-    //mainWidget->layout()->setMargin(0);
 
-    QPushButton* zoomIn = new QPushButton("ZoomIn",mainWidget);
-    zoomIn->setStyleSheet("border:1px solid black;");
-    zoomIn->setFixedSize(QSize(80,30));
+    m_zoomInBtn = new QPushButton("ZoomIn",mainWidget);
+    m_zoomInBtn->setStyleSheet("border:1px solid black;");
+    m_zoomInBtn->setFixedSize(QSize(80,30));
 
-    QPushButton* zoomOut = new QPushButton("ZoomOut",mainWidget);
-    zoomOut->setStyleSheet("border:1px solid black;");
-    zoomOut->setFixedSize(QSize(80,30));
+    m_zoomOutBtn = new QPushButton("ZoomOut",mainWidget);
+    m_zoomOutBtn->setStyleSheet("border:1px solid black;");
+    m_zoomOutBtn->setFixedSize(QSize(80,30));
 
-    QPushButton* reset = new QPushButton("Reset",mainWidget);
-    reset->setStyleSheet("border:1px solid black;");
-    reset->setFixedSize(QSize(80,30));
-
-    connect(zoomIn, &QPushButton::clicked, this, &MainWindow::zoomIn);
-    connect(zoomOut, &QPushButton::clicked, this, &MainWindow::zoomOut);
-    connect(reset, &QPushButton::clicked, this, &MainWindow::reset);
+    m_resetBtn = new QPushButton("Reset",mainWidget);
+    m_resetBtn->setStyleSheet("border:1px solid black;");
+    m_resetBtn->setFixedSize(QSize(80,30));
 
 // ---------------------------------- 3D SCENE ------------------------------------------
 
-    Widget3D* window_container = new Widget3D(QSize(800,550),QPoint(0,50), mainWidget);
+    Widget3D* container3d = new Widget3D(QSize(800,550), QPoint(0,50), mainWidget);
+
+    connect(m_zoomInBtn, &QPushButton::clicked, this, [container3d](){container3d->zoomIn();});
+    connect(m_zoomOutBtn, &QPushButton::clicked, this, [container3d](){container3d->zoomOut();});
+    connect(m_resetBtn, &QPushButton::clicked, this, [container3d](){container3d->reset();});
+
+    container3d->loadMesh("qrc:/test.obj");
+    //container3d->loadMesh("qrc:/ship.obj");
 
 // ------------------------------> Placements  -----------------------------------
-    zoomIn->raise();
-    zoomOut->raise();
+    //zoomIn->raise();
 
-    zoomIn->move(10,10);
-    zoomOut->move(100,10);
-    reset->move(190,10);
+    m_zoomInBtn->move(10,10);
+    m_zoomOutBtn->move(100,10);
+    m_resetBtn->move(190,10);
+    container3d->move(0,50);
 }
 
 

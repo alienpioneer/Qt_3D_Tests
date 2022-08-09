@@ -2,13 +2,14 @@
 #include <QDebug>
 
 Widget3D::Widget3D(const QSize& size, const QPoint& position, QWidget *parent)
-    : QWidget{parent}
+    : QWidget{parent},
+      m_bkgColor(QColor(118,118,118))
 {
     // Create the 3d window and the renderer
     Qt3DExtras::Qt3DWindow* window = new  Qt3DExtras::Qt3DWindow();
 
     Qt3DExtras::QForwardRenderer *forward_renderer = window->defaultFrameGraph();
-    forward_renderer->setClearColor(QColor(118,118,118));
+    forward_renderer->setClearColor(m_bkgColor);
 
     // Create the container for the 3d window
     QWidget* window_container = QWidget::createWindowContainer(window);
@@ -38,18 +39,14 @@ Widget3D::Widget3D(const QSize& size, const QPoint& position, QWidget *parent)
     pointLight->setIntensity(1);
     m_lightNode->addComponent(pointLight);
 
-    Qt3DCore::QTransform* lightTransform = new Qt3DCore::QTransform();
-    lightTransform->setTranslation(m_camera->position());
-    m_lightNode->addComponent(lightTransform);
+    m_lightTransformNode = new Qt3DCore::QTransform();
+    m_lightNode->addComponent(m_lightTransformNode);
+    m_lightTransformNode->setTranslation(m_camera->position());
 
-    // Create the 3d object container (entity)
+    // Create the 3d object container Node (entity)
     m_3dObjectNode = new  Qt3DCore::QEntity(m_sceneRoot);
 
-    //----> 3d shapes
-    m_objMesh = new Qt3DRender::QMesh(m_3dObjectNode);
-    m_objMesh->setSource(QUrl(QStringLiteral(":/testCube.obj")));
-
-    qDebug() << m_objMesh->source().toDisplayString();
+    // ----> Create other 3d shapes
 
     Qt3DExtras::QSphereMesh* sphereMesh = new Qt3DExtras::QSphereMesh();
     sphereMesh->setRings(30);
@@ -61,8 +58,12 @@ Widget3D::Widget3D(const QSize& size, const QPoint& position, QWidget *parent)
     cylinderMesh->setRadius(3);
     cylinderMesh->setSlices(30);
 
-    m_3dObjectNode->addComponent(cylinderMesh);
-    //object3d->addComponent(objMesh);
+    //m_3dObjectNode->addComponent(cylinderMesh);
+    //m_3dObjectNode->addComponent(sphereMesh);
+
+    // ----> Create custom mesh loader
+    m_objMesh = new Qt3DRender::QMesh(m_3dObjectNode);
+    connect(m_objMesh, &Qt3DRender::QMesh::statusChanged, this, &Widget3D::on_meshLoaderStatusChanged);
 
     // Create 3d materials
     Qt3DExtras::QPhongMaterial* phongMat = new Qt3DExtras::QPhongMaterial();
@@ -72,18 +73,65 @@ Widget3D::Widget3D(const QSize& size, const QPoint& position, QWidget *parent)
 }
 
 
-void Widget3D::on_zoomIn()
+// -------------------------------------------- MESH LOADER --------------------------------------------
+
+void Widget3D::loadMesh(const QString sourcePath)
+{
+    m_objMesh->setSource(QUrl(sourcePath));
+    updateMeshStatus(MeshLoadingStatus::LOADING);
+    //qDebug() << m_objMesh->source().toDisplayString();
+}
+
+
+void Widget3D::on_meshLoaderStatusChanged()
+{
+    if( m_objMesh->status() == Qt3DRender::QMesh::Ready )
+    {
+        m_3dObjectNode->addComponent(m_objMesh);
+        updateMeshStatus(MeshLoadingStatus::LOADED);
+    }
+
+    //qDebug() << m_objMesh->status();
+}
+
+
+void Widget3D::updateMeshStatus(const MeshLoadingStatus& status)
+{
+    if (status == MeshLoadingStatus::LOADING )
+    {
+        m_t0 = std::chrono::high_resolution_clock::now();
+        qDebug() << "Mesh loading ...";
+    }
+    else if (status == MeshLoadingStatus::LOADED )
+    {
+        m_t1 = std::chrono::high_resolution_clock::now();
+        qDebug() << "Mesh loaded in " << std::chrono::duration_cast<std::chrono::milliseconds>(m_t1-m_t0).count() << " ms";
+    }
+}
+
+
+// -------------------------------------------- CAMERA CONTROLS --------------------------------------------
+
+void Widget3D::zoomIn()
 {
     m_camera->setPosition(m_camera->position() - QVector3D(0,0,10.0f));
+    m_lightTransformNode->setTranslation(m_camera->position());
+    //qDebug() << "Camera position " << m_camera->position();
 }
 
-void Widget3D::on_zoomOut()
+
+void Widget3D::zoomOut()
 {
     m_camera->setPosition(m_camera->position() + QVector3D(0,0,10.0f));
+    m_lightTransformNode->setTranslation(m_camera->position());
+    //qDebug() << "Camera position " << m_camera->position();
 }
 
-void Widget3D::on_reset()
+
+void Widget3D::reset()
 {
     m_camera->setPosition(QVector3D(0,0,20.0f));
     m_camera->setViewCenter(QVector3D(0,0,0));
+    m_lightTransformNode->setTranslation(m_camera->position());
+    //qDebug() << "Camera position " << m_camera->position();
 }
