@@ -27,9 +27,10 @@ Widget3D::Widget3D(const QSize& size, const QPoint& position, QWidget *parent)
     m_camera->setPosition(QVector3D(0,0,20.0f));
     m_camera->setUpVector(QVector3D(0,1,0));
     m_camera->setViewCenter(QVector3D(0,0,0));
+    connect(m_camera, &Qt3DRender::QCamera::positionChanged, this ,&Widget3D::on_cameraPositionChanged);
 
-    //Qt3DExtras::QOrbitCameraController* camController = new Qt3DExtras::QOrbitCameraController(m_sceneRoot);
-    Qt3DExtras::QFirstPersonCameraController* camController = new Qt3DExtras::QFirstPersonCameraController(m_sceneRoot);
+    Qt3DExtras::QOrbitCameraController* camController = new Qt3DExtras::QOrbitCameraController(m_sceneRoot);
+    //Qt3DExtras::QFirstPersonCameraController* camController = new Qt3DExtras::QFirstPersonCameraController(m_sceneRoot);
     camController->setCamera(m_camera);
 
     // Create the 3d light
@@ -92,6 +93,13 @@ void Widget3D::on_meshLoaderStatusChanged()
     }
 
     //qDebug() << m_objMesh->status();
+}
+
+
+void Widget3D::on_cameraPositionChanged(const QVector3D &position)
+{
+    //qDebug() << "Camera position changed";
+    //m_camera->setViewCenter(QVector3D(0,0,0));
 }
 
 

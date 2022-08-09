@@ -26,6 +26,7 @@ public:
 
 private slots:
     void on_meshLoaderStatusChanged();
+    void on_cameraPositionChanged(const QVector3D& position);
 
 private:
     void updateMeshStatus(const MeshLoadingStatus& status);
