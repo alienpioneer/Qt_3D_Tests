@@ -15,6 +15,7 @@ public:
 private slots:
     void on_zoomIn();
     void on_zoomOut();
+    void on_reset();
 
 private:
     Qt3DRender::QCamera* m_camera;

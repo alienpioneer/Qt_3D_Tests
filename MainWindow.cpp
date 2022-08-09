@@ -21,8 +21,12 @@ MainWindow::MainWindow(QWidget *parent)
     QPushButton* zoomOut = new QPushButton("ZoomOut",mainWidget);
     zoomOut->setStyleSheet("border:1px solid black;");
 
+    QPushButton* reset = new QPushButton("Reset",mainWidget);
+    reset->setStyleSheet("border:1px solid black;");
+
     connect(zoomIn, &QPushButton::clicked, this, &MainWindow::on_zoomIn);
     connect(zoomOut, &QPushButton::clicked, this, &MainWindow::on_zoomOut);
+    connect(reset, &QPushButton::clicked, this, &MainWindow::on_reset);
 
 // ---------------------------------- 3D SCENE ------------------------------------------
 
@@ -67,7 +71,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     //----> 3d shapes
     Qt3DRender::QMesh* objMesh = new Qt3DRender::QMesh(object3d);
-    objMesh->setSource(QUrl(QStringLiteral(":/Qt_logo.obj")));
+    objMesh->setSource(QUrl(QStringLiteral(":/testCube.obj")));
+
+    qDebug() << objMesh->source().toDisplayString();
 
     Qt3DExtras::QSphereMesh* sphereMesh = new Qt3DExtras::QSphereMesh();
     sphereMesh->setRings(30);
@@ -80,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
     cylinderMesh->setSlices(30);
 
     object3d->addComponent(cylinderMesh);
+    //object3d->addComponent(objMesh);
 
     // Create 3d materials
     Qt3DExtras::QPhongMaterial* phongMat = new Qt3DExtras::QPhongMaterial();
@@ -93,8 +100,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     zoomIn->setFixedSize(QSize(80,30));
     zoomOut->setFixedSize(QSize(80,30));
+    reset->setFixedSize(QSize(80,30));
     zoomIn->move(10,10);
     zoomOut->move(100,10);
+    reset->move(190,10);
 
     window_container->setFixedSize(QSize(800,550));
     window_container->move(0,50);
@@ -112,5 +121,11 @@ void MainWindow::on_zoomIn()
 void MainWindow::on_zoomOut()
 {
     m_camera->setPosition(m_camera->position() + QVector3D(0,0,10.0f));
+}
+
+void MainWindow::on_reset()
+{
+    m_camera->setPosition(QVector3D(0,0,20.0f));
+    m_camera->setViewCenter(QVector3D(0,0,0));
 }
 
